@@ -42,7 +42,6 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         return (ZeeverseRentInfo[tokenId]).rentDeadline;
     }
     
-    // [PreIssue] 1. owner => preIssue the Real Shark => get the Wrap Shark
     function preIssue(uint256 tokenId, uint256 secondRent) public nonReentrant {
         require(secondRent > 0, "SecondRent can't not be zero");
         require(msg.sender == IERC721(Collateral).ownerOf(tokenId), "Msg.sender do not own the NFT");
@@ -65,7 +64,6 @@ contract ZeeverseRentV1 is ReentrancyGuard {
     } 
     
 
-    // [Rent] 2. user => Rent => Change owner, burn the Wrap Shark, and get the new Wrap Shark
     function requestRental(uint256 tokenId) public payable nonReentrant {
         RentalInfo memory rentalInfo = ZeeverseRentInfo[tokenId];
 
@@ -89,7 +87,6 @@ contract ZeeverseRentV1 is ReentrancyGuard {
     }
 
 
-    // [claim] 3. owner => claim the assets
     function claim(uint256 tokenId) public nonReentrant {
         RentalInfo memory rentalInfo = ZeeverseRentInfo[tokenId];
 
