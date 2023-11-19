@@ -10,8 +10,9 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "./WrapZee.sol";
 
-contract ZeeverseRentV1 is ReentrancyGuard {
+contract ZeeverseRentV1 is ReentrancyGuard, Ownable {
     address constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address constant ADMIN = 0x790ac11183ddE23163b307E3F7440F2460526957;
     uint256 constant INITIAL_DDL = 0;
     uint256 constant PROTOCOL_FEE = 500;
     address private Collateral;
@@ -28,7 +29,7 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         address occupant;
     }
 
-    constructor (address collateral) {
+    constructor (address collateral) Ownable(ADMIN) {
         Collateral = collateral;
         protocolFee = PROTOCOL_FEE;
         wrapZee = new WrapZee("WrapZee", "WrapZee");
@@ -77,10 +78,10 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         rentalInfo.rentDeadline = block.timestamp + msg.value / rentalInfo.secondRent;
         ZeeverseRentInfo[tokenId] = rentalInfo;
 
-        // changeOccupant
+        // change occupant
         wrapZee.changeOccupant(tokenId, msg.sender);
 
-        // Send to host
+        // Send rent fee to host
         uint256 valueAfterFee = msg.value * protocolFee / 10000;
         (bool status, ) = payable(rentalInfo.host).call{value: msg.value - valueAfterFee}("");
         require(status == true, "Send to host Fail");
@@ -106,6 +107,11 @@ contract ZeeverseRentV1 is ReentrancyGuard {
 
     function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
+    }
+
+    function withdrawFee() public onlyOwner {
+        (bool result,) = payable(ADMIN).call{value: address(this).balance}("");
+        require(result, "withdraw fee");
     }
 
     receive() external payable {}

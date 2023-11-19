@@ -8,6 +8,7 @@ import "src/ZeeverseRent.sol";
 contract ZeeverRentDeploy is Script {
     address ZEE = 0x094fA8aE08426AB180e71e60FA253B079E13B9FE;
 
+    // forge script script/deploy.s.sol:ZeeverRentDeploy --fork-url https://arb1.arbitrum.io/rpc --broadcast --verify -vvvv 
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
@@ -19,4 +20,5 @@ contract ZeeverRentDeploy is Script {
 
         vm.stopBroadcast();
     }
+
 }

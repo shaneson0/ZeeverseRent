@@ -1,66 +1,28 @@
-## Foundry
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+# ZeeverseRent
 
-Foundry consists of:
+To Zeeverse Community and Zeeverse Team,
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+During my free time after work, I have been thinking a lot about how to help release liquidity for NFTs in Zeeverse.
 
-## Documentation
+As the game grows increasingly popular and the prices of legendary equipment skyrocket, a new problem arises here：
 
-https://book.getfoundry.sh/
+Users cannot afford to purchase a legendary Zee/Equipment, but they can afford the cost of short-term rentals, such as for 1 or 2 days; While the holders are also unwilling to sell.
 
-## Usage
+I have come up with the idea of creating a rental contract service for Zeeverse, called ZeeverseRent, to address the lending issue that typically requires over-collateralization~
 
-### Build
+BTW,
+No VC or IDO or ... ,
+No token list,
+No liquidity pool,
+Just a tool,
+Just for the community ~~
 
-```shell
-$ forge build
-```
+The contract will be open source in several days~
 
-### Test
+I have invited my friends who are some of the best auditors in the world, and a talent front-end engineer~
 
-```shell
-$ forge test
-```
+let us co-build the $VEE ～～～
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+Sincerely,
+Shaneson.eth
