@@ -82,28 +82,6 @@ contract ZeeverseRentTesting is Test {
 
     // 1. preIssue
     // 2. Rent
-    // 3. settle
-    function test2_Settle() public {
-        test1();
-
-        uint256 now_timestamp = block.timestamp;
-        vm.warp(now_timestamp + 10001);
-
-        vm.startPrank(shaneson);
-        zeeverseRentV1.settle(tokenID);
-
-        // check
-        require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check10");
-        require(zeeverseRentV1.getDeadLine(tokenID) == 0 , "check12");
-        require(IERC721(WrapZeeTest).balanceOf(0x399EfA78cAcD7784751CD9FBf2523eDf9EFDf6Ad) == 0, "check13");
-        require(IERC721(WrapZeeTest).balanceOf(0xDe1820F69B3022b8C3233d512993EBA8cFf29EbB) == 0, "check14");
-        require(IERC721(WrapZeeTest).balanceOf(shaneson) == 1, "check15");
-
-        vm.stopPrank();
-    }
-
-    // 1. preIssue
-    // 2. Rent
     // 3. claim
     function test3() public {
         test1();

@@ -34,14 +34,13 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         wrapZee = new WrapZee("WrapZee", "WrapZee");
     }
 
-    function getWrapZeeAddress() public returns(address) {
+    function getWrapZeeAddress() public view returns(address) {
         return address(wrapZee);
     }
 
-    function getDeadLine(uint256 tokenId) public returns(uint256) {
+    function getDeadLine(uint256 tokenId) public view returns(uint256) {
         return (ZeeverseRentInfo[tokenId]).rentDeadline;
     }
-
     
     // [PreIssue] 1. owner => preIssue the Real Shark => get the Wrap Shark
     function preIssue(uint256 tokenId, uint256 secondRent) public nonReentrant {
@@ -89,24 +88,8 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         require(status == true, "Send to host Fail");
     }
 
-    // [settle] 3. owenr => burn the user's Wrap Shar, and get the Wrap Shark
-    function settle(uint256 tokenId) public {
-        RentalInfo memory rentalInfo = ZeeverseRentInfo[tokenId];
 
-        // check 
-        require(block.timestamp > rentalInfo.rentDeadline, "Currently not available for rent");
-        require(rentalInfo.host == msg.sender, "Only host can settle");
-        require(rentalInfo.tokenId == tokenId, "Invalid tokenId in mapping");
-
-        // Update Rent Info
-        rentalInfo.occupant = msg.sender;
-        rentalInfo.rentDeadline = INITIAL_DDL;
-        ZeeverseRentInfo[tokenId] = rentalInfo;
-
-        wrapZee.changeOccupant(tokenId, rentalInfo.host);        
-    }
-
-    // [claim] 4. owner => claim the assets
+    // [claim] 3. owner => claim the assets
     function claim(uint256 tokenId) public nonReentrant {
         RentalInfo memory rentalInfo = ZeeverseRentInfo[tokenId];
 
@@ -115,15 +98,11 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         require(rentalInfo.host == msg.sender, "Only host can claim");
         require(rentalInfo.tokenId == tokenId, "Invalid tokenId in mapping");
 
-        // ReInit Rent Info
-        rentalInfo.host = address(0);
-        rentalInfo.secondRent = 0;
-        rentalInfo.tokenId = 0;
-        rentalInfo.occupant = msg.sender;
-        rentalInfo.rentDeadline = INITIAL_DDL;
-        ZeeverseRentInfo[tokenId] = rentalInfo;
+        // Delete Rent Info
+        delete rentalInfo;
+        delete ZeeverseRentInfo[tokenId];
 
-        // burn wrap token, and send collectrals to user
+        // Burn wrap token, and send collectrals to user
         wrapZee.burn(msg.sender, tokenId);
         IERC721(Collateral).safeTransferFrom(address(this), msg.sender, tokenId);
     }

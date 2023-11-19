@@ -12,7 +12,6 @@ contract WrapZee is ERC721, Ownable {
     ) ERC721(name_, symbol_) Ownable(msg.sender) {
     }
 
-    // [PreIssue] 1. owner => preIssue the Real Shark => WrapZee.safeMint(), msg.sender get the Wrap Shark
     function safeMint(address host, uint256 tokenId) public onlyOwner {
         require(balanceOf(host) == 0, "address(0) is invalid");
         Host[tokenId] = host;
