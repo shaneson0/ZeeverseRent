@@ -13,12 +13,14 @@ import "./WrapZee.sol";
 contract ZeeverseRentV1 is ReentrancyGuard {
     // focus on the zee as collateral
     address constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    uint256 constant INITIAL_DDL = 0;
+    uint256 constant PROTOCOL_FEE = 500;
     address private Collateral;
     uint256 public protocolFee;
     
     mapping(uint256 => RentalInfo) ZeeverseRentInfo;
 
-    WrapZee wrapZee;
+    WrapZee public wrapZee;
 
     struct RentalInfo {
         uint256 tokenId;
@@ -30,22 +32,33 @@ contract ZeeverseRentV1 is ReentrancyGuard {
 
     constructor (address collateral) {
         Collateral = collateral;
+        protocolFee = PROTOCOL_FEE;
         wrapZee = new WrapZee("WrapZee", "WrapZee");
-        
-        // Default: 5%
-        protocolFee = 500;
+    }
+    // ======================== VIEW FUNCTIONS =============================
+
+    function getWrapZeeAddress() public returns(address) {
+        return address(wrapZee);
     }
 
+    function getDeadLine(uint256 tokenId) public returns(uint256) {
+         RentalInfo memory rentalInfo = ZeeverseRentInfo[tokenId];
+        return rentalInfo.rentDeadline;
+
+    }
+
+    // ====================================================================
     
     // [PreIssue] 1. owner => preIssue the Real Shark => get the Wrap Shark
-    function preIssue(uint256 tokenId, uint256 dailyRent) public nonReentrant {
-        require(dailyRent > 86400, "Too little money");
+    function preIssue(uint256 tokenId, uint256 secondRent) public nonReentrant {
+        require(secondRent > 0, "SecondRent can't not be zero");
+        require(msg.sender == IERC721(Collateral).ownerOf(tokenId), "Msg.sender do not own the NFT");
 
         // Add Rent Info
         RentalInfo memory rentalInfo = RentalInfo(
             tokenId,
-            dailyRent/86400,
-            0,
+            secondRent,
+            INITIAL_DDL,
             msg.sender,
             msg.sender
         );
@@ -66,6 +79,7 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         // Check 
         require(block.timestamp > rentalInfo.rentDeadline, "Currently not available for rent");
         require(msg.value > rentalInfo.secondRent, "Too little money");
+        require(rentalInfo.tokenId == tokenId, "Invalid tokenId in mapping");
  
         // Update Rent Info
         rentalInfo.occupant = msg.sender;
@@ -88,8 +102,14 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         // check 
         require(block.timestamp > rentalInfo.rentDeadline, "Currently not available for rent");
         require(rentalInfo.host == msg.sender, "Only host can settle");
+        require(rentalInfo.tokenId == tokenId, "Invalid tokenId in mapping");
 
-        wrapZee.changeOccupant(tokenId, rentalInfo.host);
+        // Update Rent Info
+        rentalInfo.occupant = msg.sender;
+        rentalInfo.rentDeadline = INITIAL_DDL;
+        ZeeverseRentInfo[tokenId] = rentalInfo;
+
+        wrapZee.changeOccupant(tokenId, rentalInfo.host);        
     }
 
     // [claim] 4. owner => claim the assets
@@ -99,8 +119,17 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         // check 
         require(block.timestamp > rentalInfo.rentDeadline, "Currently not available for rent");
         require(rentalInfo.host == msg.sender, "Only host can claim");
+        require(rentalInfo.tokenId == tokenId, "Invalid tokenId in mapping");
 
-        wrapZee.burn(tokenId);
+        // Update Rent Info
+        rentalInfo.host = address(0);
+        rentalInfo.secondRent = 0;
+        rentalInfo.tokenId = 0;
+        rentalInfo.occupant = msg.sender;
+        rentalInfo.rentDeadline = INITIAL_DDL;
+        ZeeverseRentInfo[tokenId] = rentalInfo;
+
+        wrapZee.burn(msg.sender, tokenId);
         IERC721(Collateral).safeTransferFrom(address(this), msg.sender, tokenId);
     }
 

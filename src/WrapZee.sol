@@ -23,8 +23,8 @@ contract WrapZee is ERC721, Ownable {
         _update(newOccupant, tokenId, ownerOf(tokenId));
     }
 
-    function burn(uint256 tokenId) public onlyOwner {
-        require(tx.origin == Host[tokenId]);
+    function burn(address requestUser, uint256 tokenId) public onlyOwner {
+        require(requestUser == Host[tokenId]);
         _update(address(0), tokenId, ownerOf(tokenId));
     }
 
