@@ -11,7 +11,6 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./WrapZee.sol";
 
 contract ZeeverseRentV1 is ReentrancyGuard {
-    // focus on the zee as collateral
     address constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint256 constant INITIAL_DDL = 0;
     uint256 constant PROTOCOL_FEE = 500;
@@ -19,7 +18,6 @@ contract ZeeverseRentV1 is ReentrancyGuard {
     uint256 public protocolFee;
     
     mapping(uint256 => RentalInfo) ZeeverseRentInfo;
-
     WrapZee public wrapZee;
 
     struct RentalInfo {
@@ -35,19 +33,15 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         protocolFee = PROTOCOL_FEE;
         wrapZee = new WrapZee("WrapZee", "WrapZee");
     }
-    // ======================== VIEW FUNCTIONS =============================
 
     function getWrapZeeAddress() public returns(address) {
         return address(wrapZee);
     }
 
     function getDeadLine(uint256 tokenId) public returns(uint256) {
-         RentalInfo memory rentalInfo = ZeeverseRentInfo[tokenId];
-        return rentalInfo.rentDeadline;
-
+        return (ZeeverseRentInfo[tokenId]).rentDeadline;
     }
 
-    // ====================================================================
     
     // [PreIssue] 1. owner => preIssue the Real Shark => get the Wrap Shark
     function preIssue(uint256 tokenId, uint256 secondRent) public nonReentrant {
@@ -121,7 +115,7 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         require(rentalInfo.host == msg.sender, "Only host can claim");
         require(rentalInfo.tokenId == tokenId, "Invalid tokenId in mapping");
 
-        // Update Rent Info
+        // ReInit Rent Info
         rentalInfo.host = address(0);
         rentalInfo.secondRent = 0;
         rentalInfo.tokenId = 0;
@@ -129,6 +123,7 @@ contract ZeeverseRentV1 is ReentrancyGuard {
         rentalInfo.rentDeadline = INITIAL_DDL;
         ZeeverseRentInfo[tokenId] = rentalInfo;
 
+        // burn wrap token, and send collectrals to user
         wrapZee.burn(msg.sender, tokenId);
         IERC721(Collateral).safeTransferFrom(address(this), msg.sender, tokenId);
     }

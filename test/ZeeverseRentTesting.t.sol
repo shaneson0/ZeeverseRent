@@ -13,12 +13,12 @@ contract ZeeverseRentTesting is Test {
     address ZEE = 0x094fA8aE08426AB180e71e60FA253B079E13B9FE;
     uint256 tokenID = 1253;
     ZeeverseRentV1 zeeverseRentV1;
-    address WrapZee;
+    address WrapZeeTest;
 
     function setUp() public {
          vm.createSelectFork(vm.envString("ARB_RPC_URL"));
          zeeverseRentV1 = new ZeeverseRentV1(ZEE);
-         WrapZee = zeeverseRentV1.getWrapZeeAddress();
+         WrapZeeTest = zeeverseRentV1.getWrapZeeAddress();
     }
 
     // 1. preIssue
@@ -29,7 +29,7 @@ contract ZeeverseRentTesting is Test {
 
         // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check0");
-        require(IERC721(WrapZee).ownerOf(tokenID) == address(shaneson), "check1");
+        require(IERC721(WrapZeeTest).ownerOf(tokenID) == address(shaneson), "check1");
         vm.stopPrank();
     }
 
@@ -47,7 +47,7 @@ contract ZeeverseRentTesting is Test {
 
         // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check2");
-        require(IERC721(WrapZee).ownerOf(tokenID) == address(buyer), "check3");
+        require(IERC721(WrapZeeTest).ownerOf(tokenID) == address(buyer), "check3");
         require(zeeverseRentV1.getDeadLine(tokenID) == block.timestamp + 10000 , "check4");
         require(shaneson_balance_1  == shaneson_balance_0 + 0.00095 ether, "check5");
 
@@ -73,7 +73,7 @@ contract ZeeverseRentTesting is Test {
 
         // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check6");
-        require(IERC721(WrapZee).ownerOf(tokenID) == address(buyer), "check7");
+        require(IERC721(WrapZeeTest).ownerOf(tokenID) == address(buyer), "check7");
         require(zeeverseRentV1.getDeadLine(tokenID) == block.timestamp + 10000 , "check8");
         require(shaneson_balance_1  == shaneson_balance_0 + 0.00095 ether, "check9");
 
@@ -95,9 +95,9 @@ contract ZeeverseRentTesting is Test {
         // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check10");
         require(zeeverseRentV1.getDeadLine(tokenID) == 0 , "check12");
-        require(IERC721(WrapZee).balanceOf(0x399EfA78cAcD7784751CD9FBf2523eDf9EFDf6Ad) == 0, "check13");
-        require(IERC721(WrapZee).balanceOf(0xDe1820F69B3022b8C3233d512993EBA8cFf29EbB) == 0, "check14");
-        require(IERC721(WrapZee).balanceOf(shaneson) == 1, "check15");
+        require(IERC721(WrapZeeTest).balanceOf(0x399EfA78cAcD7784751CD9FBf2523eDf9EFDf6Ad) == 0, "check13");
+        require(IERC721(WrapZeeTest).balanceOf(0xDe1820F69B3022b8C3233d512993EBA8cFf29EbB) == 0, "check14");
+        require(IERC721(WrapZeeTest).balanceOf(shaneson) == 1, "check15");
 
         vm.stopPrank();
     }
@@ -117,11 +117,20 @@ contract ZeeverseRentTesting is Test {
         // check
         require(IERC721(ZEE).ownerOf(tokenID) == shaneson, "check16");
         require(zeeverseRentV1.getDeadLine(tokenID) == 0 , "check17");
-        require(IERC721(WrapZee).balanceOf(0x399EfA78cAcD7784751CD9FBf2523eDf9EFDf6Ad) == 0, "check18");
-        require(IERC721(WrapZee).balanceOf(0xDe1820F69B3022b8C3233d512993EBA8cFf29EbB) == 0, "check19");
-        require(IERC721(WrapZee).balanceOf(shaneson) == 0, "check20");
+        require(IERC721(WrapZeeTest).balanceOf(0x399EfA78cAcD7784751CD9FBf2523eDf9EFDf6Ad) == 0, "check18");
+        require(IERC721(WrapZeeTest).balanceOf(0xDe1820F69B3022b8C3233d512993EBA8cFf29EbB) == 0, "check19");
+        require(IERC721(WrapZeeTest).balanceOf(shaneson) == 0, "check20");
 
         vm.stopPrank();
+    }
+
+    // 1. preIssue
+    // 2. Rent
+    // 3. claim
+    // 4. preIssue
+    function test4() public {
+        test3();
+        test0();
     }
 
 }
