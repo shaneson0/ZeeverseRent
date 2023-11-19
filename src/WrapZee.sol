@@ -1,9 +1,9 @@
 pragma solidity ^0.8.21;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract WrapZee is ERC721Burnable, Ownable {
+contract WrapZee is ERC721, Ownable {
 
     mapping(uint256 => address) Host;
     constructor(
@@ -23,7 +23,7 @@ contract WrapZee is ERC721Burnable, Ownable {
         _update(newOccupant, tokenId, ownerOf(tokenId));
     }
 
-    function burn(uint256 tokenId) public override onlyOwner {
+    function burn(uint256 tokenId) public onlyOwner {
         require(tx.origin == Host[tokenId]);
         _update(address(0), tokenId, ownerOf(tokenId));
     }
