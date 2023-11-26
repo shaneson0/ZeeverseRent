@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import "./WrapZee.sol";
 
-contract ZeeverseRentV1 is ReentrancyGuard, Ownable {
+contract ZeeverseZeeRentV1 is ReentrancyGuard, Ownable {
     address constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     address constant ADMIN = 0x790ac11183ddE23163b307E3F7440F2460526957;
     uint256 constant INITIAL_DDL = 0;

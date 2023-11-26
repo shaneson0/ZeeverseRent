@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 
 import {Test} from "lib/forge-std/src/Test.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
-import "src/ZeeverseRent.sol";
+import "src/Zee/ZeeverseZeeRent.sol";
 
 import "lib/forge-std/src/console2.sol";
 
@@ -12,12 +12,12 @@ contract ZeeverseRentTesting is Test {
     address shaneson = 0x790ac11183ddE23163b307E3F7440F2460526957;
     address ZEE = 0x094fA8aE08426AB180e71e60FA253B079E13B9FE;
     uint256 tokenID = 1253;
-    ZeeverseRentV1 zeeverseRentV1;
+    ZeeverseZeeRentV1 zeeverseRentV1;
     address WrapZeeTest;
 
     function setUp() public {
          vm.createSelectFork(vm.envString("ARB_RPC_URL"));
-         zeeverseRentV1 = new ZeeverseRentV1(ZEE);
+         zeeverseRentV1 = new ZeeverseZeeRentV1(ZEE);
          WrapZeeTest = zeeverseRentV1.getWrapZeeAddress();
     }
 
