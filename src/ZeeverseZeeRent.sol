@@ -20,6 +20,7 @@ contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
 
     uint256 constant INITIAL_DDL = 0;
     uint256 constant PROTOCOL_FEE = 500;
+    uint256 constant MIN_MAX_DURATION = 39600;
 
     address public constant ZEE_COLLATERAL = 0x094fA8aE08426AB180e71e60FA253B079E13B9FE;
     address public constant EQUIPMENT_COLLATERAL = 0x58318BCeAa0D249B62fAD57d134Da7475e551B47;
@@ -59,9 +60,9 @@ contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
 
     // ================================= main =================================
     
-    function issueZee(uint256 tokenId, uint256 secondRent) public nonReentrant returns (uint256 wrapId) {
-        require(secondRent > 0, "SecondRent can't not be zero");
+    function issueZee(uint256 tokenId, uint256 secondRent, uint256 maxDuration) public nonReentrant returns (uint256 wrapId) {
         require(msg.sender == IERC721(ZEE_COLLATERAL).ownerOf(tokenId), "Msg.sender do not own the NFT");
+        require(maxDuration < MIN_MAX_DURATION, "maxDuration need to longer that 11hours");
 
         // Add Rent Info
         IOUInfo memory iouInfo = IOUInfo(
@@ -70,6 +71,7 @@ contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
             1, 
             secondRent,
             INITIAL_DDL,
+            maxDuration,
             msg.sender,
             msg.sender,
             WrapType.ZEE
@@ -84,11 +86,10 @@ contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
 
     function requestRental(uint256 wrapId) public payable nonReentrant {
         IOUInfo memory iouInfo = zeeWrapAsset.getIOUInfo(wrapId);
-
-        // Check 
-        require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
+        require(iouInfo.maxDuration >= msg.value / iouInfo.secondRent, "Can't exceed the max duration");
         require(msg.value > iouInfo.secondRent, "Too little money");
- 
+        require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
+
         // Update Rent Info
         iouInfo.occupant = msg.sender;
         iouInfo.rentDeadline = block.timestamp + msg.value / iouInfo.secondRent;

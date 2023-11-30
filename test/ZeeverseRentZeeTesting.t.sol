@@ -26,7 +26,7 @@ contract ZeeverseRentTesting is Test {
     function test0() public returns (uint256 wrapId) {
         vm.startPrank(shaneson);
         IERC721(ZEE).approve(address(zeeverseRentV1), tokenID);
-        wrapId = zeeverseRentV1.issueZee(tokenID, 0.0000001 ether);
+        wrapId = zeeverseRentV1.issueZee(tokenID, 0.0000001 ether, 10000);
 
         // // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check0");

@@ -26,9 +26,11 @@ contract ZeeWrapAsset is ERC721, IOU, Ownable {
     }
 
     function safeMint(IOUInfo memory iouInfo) public onlyOwner returns (uint256){
-        // check state
+        // check  mint state
         require(balanceOf(iouInfo.host) == 0, "host(0) is invalid");
         require(balanceOf(iouInfo.occupant) == 0, "occupant(0) is invalid");
+        require(iouInfo.secondRent > 0, "SecondRent can't not be zero");
+        require(iouInfo.maxDuration > 0, "maxDuration can't not be zero");
 
         // update state
         iouInfo.wrapId = WRAPID;
