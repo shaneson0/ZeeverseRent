@@ -85,35 +85,22 @@ contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
     }
 
     function requestRental(uint256 wrapId) public payable nonReentrant {
-        IOUInfo memory iouInfo = zeeWrapAsset.getIOUInfo(wrapId);
-        require(iouInfo.maxDuration >= msg.value / iouInfo.secondRent, "Can't exceed the max duration");
-        require(msg.value > iouInfo.secondRent, "Too little money");
-        require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
-
-        // Update Rent Info
-        iouInfo.occupant = msg.sender;
-        iouInfo.rentDeadline = block.timestamp + msg.value / iouInfo.secondRent;
+        address newOccupant = msg.sender;
+        uint256 newRentDeadline = zeeWrapAsset.getNewRentDeadline(wrapId, msg.value);
 
         // change occupant
-        zeeWrapAsset.changeOccupant(iouInfo);
+        address host = zeeWrapAsset.changeOccupant(wrapId, newOccupant, newRentDeadline, msg.value);
 
         // Send rent fee to host
         uint256 valueAfterFee = msg.value * protocolFee / 10000;
-        (bool status, ) = payable(iouInfo.host).call{value: msg.value - valueAfterFee}("");
+        (bool status, ) = payable(host).call{value: msg.value - valueAfterFee}("");
         require(status == true, "Send to host Fail");
     }
 
-
+    // Burn wrap token, and send collectrals to user
     function claim(uint256 wrapId) public nonReentrant {
-        IOUInfo memory iouInfo = zeeWrapAsset.getIOUInfo(wrapId);
-
-        // check state
-        require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
-        require(iouInfo.host == msg.sender, "Only host can claim");
-
-        // Burn wrap token, and send collectrals to user
-        zeeWrapAsset.burn(msg.sender, iouInfo.wrapId);
-        IERC721(ZEE_COLLATERAL).safeTransferFrom(address(this), msg.sender, iouInfo.tokenId);
+        uint256 tokenId = zeeWrapAsset.burn(msg.sender, wrapId);
+        IERC721(ZEE_COLLATERAL).safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
 

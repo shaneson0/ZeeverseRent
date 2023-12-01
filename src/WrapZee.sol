@@ -16,11 +16,18 @@ contract ZeeWrapAsset is ERC721, IOU, Ownable {
         WRAPID = 0;
     }
 
-    function getIOUInfo(uint256 wrapId) external view returns (IOUInfo memory) {
-        return wrapAssets[wrapId];
+    function getNewRentDeadline(uint256 wrapId, uint256 totalCost) external view returns (uint256) {
+        IOUInfo memory iouInfo = wrapAssets[wrapId];
+        uint256 newRentDeadline =  block.timestamp + totalCost / iouInfo.secondRent;
+        return newRentDeadline;
     }
 
-    function getDeadLine(uint256 wrapId) public view returns(uint256 ddl) {
+    function getSecondRent(uint256 wrapId) external view returns (uint256) {
+        IOUInfo memory iouInfo = wrapAssets[wrapId];
+        return iouInfo.secondRent;    
+    }
+
+    function getDeadLine(uint256 wrapId) public view returns(uint256) {
         IOUInfo memory iouInfo = wrapAssets[wrapId];
         return iouInfo.rentDeadline;
     }
@@ -42,22 +49,32 @@ contract ZeeWrapAsset is ERC721, IOU, Ownable {
         return iouInfo.wrapId;
     }
 
-    function changeOccupant(IOUInfo memory iouInfo) external onlyOwner {
+    function changeOccupant(uint256 wrapId, address newOccupant, uint256 newRentDeadline, uint256 totalCost) external onlyOwner returns(address) {
+        IOUInfo memory iouInfo = wrapAssets[wrapId];
+        require(block.timestamp + iouInfo.maxDuration >= newRentDeadline, "Can't exceed the max duration");
+        require(totalCost > iouInfo.secondRent, "Too little money");
+        require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
+
         // update state
+        iouInfo.occupant = newOccupant;
+        iouInfo.rentDeadline = newRentDeadline;
         wrapAssets[iouInfo.wrapId] = iouInfo;
 
         // change owner
         _update(iouInfo.occupant, iouInfo.wrapId, ownerOf(iouInfo.wrapId));
+        return iouInfo.host;
     }
 
-    function burn(address requestUser, uint256 wrapId) public onlyOwner {
+    function burn(address requestUser, uint256 wrapId) public onlyOwner returns (uint256) {
         // check state
         IOUInfo memory iouInfo = wrapAssets[wrapId];
-        require(requestUser == iouInfo.host);
+        require(requestUser == iouInfo.host, "only host can claim");
         require(ownerOf(iouInfo.wrapId) == iouInfo.occupant, "owner of wrapId is not occupant");
+        require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
 
         // update state
         _update(address(0), iouInfo.wrapId, ownerOf(wrapId));
+        return iouInfo.tokenId;
     }
 
 
