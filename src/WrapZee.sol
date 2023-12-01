@@ -16,6 +16,8 @@ contract ZeeWrapAsset is ERC721, IOU, Ownable {
         WRAPID = 0;
     }
 
+    // ================================= view =================================
+
     function getNewRentDeadline(uint256 wrapId, uint256 totalCost) external view returns (uint256) {
         IOUInfo memory iouInfo = wrapAssets[wrapId];
         uint256 newRentDeadline =  block.timestamp + totalCost / iouInfo.secondRent;
@@ -31,6 +33,8 @@ contract ZeeWrapAsset is ERC721, IOU, Ownable {
         IOUInfo memory iouInfo = wrapAssets[wrapId];
         return iouInfo.rentDeadline;
     }
+
+    // ================================= onlyOwner =================================
 
     function safeMint(IOUInfo memory iouInfo) public onlyOwner returns (uint256){
         // check  mint state
@@ -51,8 +55,8 @@ contract ZeeWrapAsset is ERC721, IOU, Ownable {
 
     function changeOccupant(uint256 wrapId, address newOccupant, uint256 newRentDeadline, uint256 totalCost) external onlyOwner returns(address) {
         IOUInfo memory iouInfo = wrapAssets[wrapId];
-        require(block.timestamp + iouInfo.maxDuration >= newRentDeadline, "Can't exceed the max duration");
         require(totalCost > iouInfo.secondRent, "Too little money");
+        require(block.timestamp + iouInfo.maxDuration >= newRentDeadline, "Can't exceed the max duration");
         require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
 
         // update state
