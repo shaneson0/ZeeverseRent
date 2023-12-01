@@ -26,7 +26,7 @@ contract ZeeverseRentTesting is Test {
     function test0() public returns (uint256 wrapId) {
         vm.startPrank(shaneson);
         IERC721(ZEE).approve(address(zeeverseRentV1), tokenID);
-        wrapId = zeeverseRentV1.issueZee(tokenID, 0.0000001 ether, 10000);
+        wrapId = zeeverseRentV1.issueZee(tokenID, 0.0000001 ether, 50000);
 
         // // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check0");
@@ -44,15 +44,18 @@ contract ZeeverseRentTesting is Test {
         vm.startPrank(buyer);
         console2.log(block.timestamp);
 
-        zeeverseRentV1.requestRental{value: 0.001 ether}(wrapId);
+        zeeverseRentV1.requestRental{value: 0.004 ether}(wrapId);
 
         uint256 shaneson_balance_1 = payable(shaneson).balance;
+        console2.log("shaneson_balance_0: ", shaneson_balance_0);
+        console2.log("shaneson_balance_1: ", shaneson_balance_1);
+
 
         // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check2");
         require(IERC721(WrapZeeAsset).ownerOf(wrapId) == address(buyer), "check3");
-        require(ZeeWrapAsset(zeeverseRentV1.getWrapZeeAddress()).getDeadLine(wrapId) == block.timestamp + 10000 , "check4");
-        require(shaneson_balance_1  == shaneson_balance_0 + 0.00095 ether, "check5");
+        require(ZeeWrapAsset(zeeverseRentV1.getWrapZeeAddress()).getDeadLine(wrapId) == block.timestamp + 40000 , "check4");
+        require(shaneson_balance_1  == shaneson_balance_0 + 0.0038 ether, "check5");
 
         vm.stopPrank();
         return wrapId;
@@ -65,21 +68,21 @@ contract ZeeverseRentTesting is Test {
         uint256 wrapId = test1();
 
         uint256 now_timestamp = block.timestamp;
-        vm.warp(now_timestamp + 10001);
+        vm.warp(now_timestamp + 40001);
 
         address buyer = 0x399EfA78cAcD7784751CD9FBf2523eDf9EFDf6Ad;
         uint256 shaneson_balance_0 = payable(shaneson).balance;
 
         vm.startPrank(buyer);
-        zeeverseRentV1.requestRental{value: 0.001 ether}(wrapId);
+        zeeverseRentV1.requestRental{value: 0.004 ether}(wrapId);
 
         uint256 shaneson_balance_1 = payable(shaneson).balance;
 
         // check
         require(IERC721(ZEE).ownerOf(tokenID) == address(zeeverseRentV1), "check6");
         require(IERC721(WrapZeeAsset).ownerOf(wrapId) == address(buyer), "check7");
-        require(ZeeWrapAsset(zeeverseRentV1.getWrapZeeAddress()).getDeadLine(wrapId) == block.timestamp + 10000 , "check4");
-        require(shaneson_balance_1  == shaneson_balance_0 + 0.00095 ether, "check9");
+        require(ZeeWrapAsset(zeeverseRentV1.getWrapZeeAddress()).getDeadLine(wrapId) == block.timestamp + 40000 , "check4");
+        require(shaneson_balance_1  == shaneson_balance_0 + 0.0038 ether, "check9");
 
         vm.stopPrank();
     }
@@ -91,7 +94,7 @@ contract ZeeverseRentTesting is Test {
         uint256 wrapId = test1();
 
         uint256 now_timestamp = block.timestamp;
-        vm.warp(now_timestamp + 10001);
+        vm.warp(now_timestamp + 40001);
 
         vm.startPrank(shaneson);
         zeeverseRentV1.claim(wrapId);
