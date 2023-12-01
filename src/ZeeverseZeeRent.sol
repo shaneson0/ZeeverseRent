@@ -9,21 +9,11 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "lib/forge-std/src/console2.sol";
 
-
+import "./ZeeverseConstant.sol";
 import "./WrapZee.sol";
-import "./IOU.sol";
 
-contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
-    address constant NATIVE_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address constant ADMIN = 0x790ac11183ddE23163b307E3F7440F2460526957;
-    uint256 constant NEED_INIT = 0;
+contract ZeeverseZeeRentV1 is ZeeverseConstant, ReentrancyGuard, Ownable {
 
-    uint256 constant INITIAL_DDL = 0;
-    uint256 constant PROTOCOL_FEE = 500;
-    uint256 constant MIN_MAX_DURATION = 39600;
-
-    address public constant ZEE_COLLATERAL = 0x094fA8aE08426AB180e71e60FA253B079E13B9FE;
-    address public constant EQUIPMENT_COLLATERAL = 0x58318BCeAa0D249B62fAD57d134Da7475e551B47;
 
     uint256 public protocolFee;
     
@@ -62,7 +52,7 @@ contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
     
     function issueZee(uint256 tokenId, uint256 secondRent, uint256 maxDuration) public nonReentrant returns (uint256 wrapId) {
         require(msg.sender == IERC721(ZEE_COLLATERAL).ownerOf(tokenId), "Msg.sender do not own the NFT");
-        require(maxDuration < MIN_MAX_DURATION, "maxDuration need to longer that 11hours");
+        require(maxDuration > MIN_MAX_DURATION, "maxDuration need to longer that 11hours");
 
         // Add Rent Info
         IOUInfo memory iouInfo = IOUInfo(
@@ -93,6 +83,7 @@ contract ZeeverseZeeRentV1 is IOU, ReentrancyGuard, Ownable {
 
         // Send rent fee to host
         uint256 valueAfterFee = msg.value * protocolFee / 10000;
+        
         (bool status, ) = payable(host).call{value: msg.value - valueAfterFee}("");
         require(status == true, "Send to host Fail");
     }

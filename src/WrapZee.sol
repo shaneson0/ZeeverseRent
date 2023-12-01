@@ -2,9 +2,9 @@ pragma solidity ^0.8.21;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IOU.sol";
+import "./ZeeverseConstant.sol";
 
-contract ZeeWrapAsset is ERC721, IOU, Ownable {
+contract ZeeWrapAsset is ERC721, ZeeverseConstant, Ownable {
 
     uint256 WRAPID;
     mapping(uint256 => IOUInfo)  wrapAssets;
@@ -58,6 +58,7 @@ contract ZeeWrapAsset is ERC721, IOU, Ownable {
         require(totalCost > iouInfo.secondRent, "Too little money");
         require(block.timestamp + iouInfo.maxDuration >= newRentDeadline, "Can't exceed the max duration");
         require(block.timestamp > iouInfo.rentDeadline, "Currently not available for rent");
+        require(block.timestamp + MIN_MAX_DURATION < newRentDeadline, "newRentDeadline need to longer that 11hours");
 
         // update state
         iouInfo.occupant = newOccupant;
